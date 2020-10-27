@@ -1,0 +1,77 @@
+name: "Draft new release"
+
+on:
+  push:
+    branches:
+      - "gpg-test"
+
+jobs:
+  draft-new-release:
+    name: "Draft a new release"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      # - name: Normalize version
+      #   id: normalize_version
+      #   run: |
+      #     version="v0.0.1"
+      #     echo "::set-output name=version::$version"
+
+      # Set up committer info and GPG key
+      - name: Import GPG key
+        id: import_gpg
+        uses: XLabsProject/ghaction-import-gpg@25d9d6ab99eb355c169c33c2306a72df85d9f516
+        with:
+          git-commit-gpgsign: true
+          git-committer-email: "${{ secrets.XLABS_CI_EMAIL }}"
+          git-committer-name: "${{ secrets.XLABS_CI_NAME }}"
+          git-push-gpgsign: true
+          git-tag-gpgsign: true
+          git-user-signingkey: true
+          gpg-private-key: ${{ secrets.XLABS_CI_GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.XLABS_CI_GPG_PASSWORD }}
+
+      # - name: Create branch release/${{ steps.normalize_version.outputs.version }}
+      #   run: git checkout -b "release/${{ steps.normalize_version.outputs.version }}"
+
+      # - name: Rename Unreleased section in changelog to ${{ steps.normalize_version.outputs.version }}
+      #   uses: thomaseizinger/keep-a-changelog-new-release@1.1.0
+      #   with:
+      #     version: ${{ steps.normalize_version.outputs.version }}
+
+      - name: Commit changelog
+        id: make-commit
+        run: |
+          # echo ====== 1
+          # git diff
+          # echo ====== 2
+          # gpg --list-keys
+          # echo ====== 3
+          # gpg --list-secret-keys
+          # echo ====== 4
+          # git config --list
+          # echo ====== 5
+          # echo pinentry-mode loopback >> ~/.gnupg/gpg.conf
+          # echo allow-loopback-pinentry >> ~/.gnupg/gpg-agent.conf
+          # echo allow-preset-passphrase >> ~/.gnupg/gpg-agent.conf
+          # echo ====== 6
+          # echo RELOADAGENT | gpg-connect-agent
+          # gpg-connect-agent reloadagent /bye
+          # eval $(gpg-agent --daemon --allow-preset-passphrase --default-cache-ttl 1 --max-cache-ttl 31536000)
+          # echo ====== 7
+          # for keygrip in $(gpg --batch --with-colons --with-keygrip --list-secret-keys ${{ steps.import_gpg.outputs.fingerprint }} | grep '^grp:' | cut -d: -f 10)
+          # do
+            # echo "> $keygrip"
+            # /usr/lib/gnupg/gpg-preset-passphrase -c "$keygrip" <<< "${{ secrets.XLABS_CI_GPG_PASSPHRASE }}"
+          # done
+          echo ====== 8
+          for fpr in $(gpg --no-tty --list-keys --with-colons  | awk -F: '/fpr:/ {print $10}' | sort -u); do echo -e "5\ny\n" | gpg --no-tty --command-fd 0 --status-fd 2 --expert --edit-key ${{ steps.import_gpg.outputs.fingerprint }} trust; done
+          echo ====== 9
+          gpg --sign --no-tty --status-fd 2 --always-trust --verbose -o /dev/null /dev/null
+          echo ====== 10
+          echo hi > hey.txt
+          echo ====== 11
+          git commit -a -S -m "Prepare release ${{ steps.normalize_version.outputs.version }}"
+          echo ====== 12
+          echo "::set-output name=commit::$(git rev-parse HEAD)"
