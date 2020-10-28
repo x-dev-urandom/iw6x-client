@@ -85,4 +85,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Unreleased]: https://github.com/x-dev-urandom/iw6x-client/compare/v1.0.0-test.1...HEAD
 
-[v1.0.0-test.1]: https://github.com/x-dev-urandom/iw6x-client/compare/be4005d31eaa80b08265b8e52a1de9570212e900...v1.0.0-test.1
+[v1.0.0-test.1]: https://github.com/x-dev-urandom/iw6x-client/compare/a99c5c8b9fdd0f010fe5a992a40d2b2bd693ae01...v1.0.0-test.1
